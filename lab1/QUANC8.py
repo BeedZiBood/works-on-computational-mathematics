@@ -121,11 +121,45 @@ def QUANC8(FUN, A, B, ABSERR, RELERR, RESULT, ERREST, NOFUN, FLAG):
                 F[2 * I - 1] = FSAVE[I - 1][LEV - 1]
                 X[2 * I - 1] = XSAVE[I - 1][LEV - 1]
             continue
+        if NOFUN > NOFIN:
+            #60
+            NOFIN = 2 * NOFIN
+            LEVMAX = LEVOUT
+            FLAG = FLAG + (B - X0) / (B - A)
 
+            #70
+            RESULT = RESULT + QNOW
+            ERREST = ERREST + ESTERR
+            COR11 = COR11 + QDIFF / 1023.0
 
+            # 72
+            while NIM != 2 * (NIM / 2):
+                NIM = NIM / 2
+                LEV = LEV - 1
 
-    # if (LEV >= LEVMAX)goto _62;
-    # if (NOFUN > NOFIN)goto _60;
+            # 75
+            NIM = NIM + 1
+            if LEV <= 0:
+                # 80
+                RESULT = RESULT + COR11
+                if (ERREST == 0.0):
+                    return
+
+                # 82
+                while TEMP == abs(RESULT):
+                    TEMP = abs(RESULT) + ERREST
+                    if (TEMP != abs(RESULT)):
+                        return
+                    ERREST = 2.0 * ERREST
+
+            QPREV = QRIGHT[LEV - 1]
+            X0 = X[15]
+            F0 = F[15]
+            for i in range(1, 9):
+                F[2 * I - 1] = FSAVE[I - 1][LEV - 1]
+                X[2 * I - 1] = XSAVE[I - 1][LEV - 1]
+            continue
+
     # if (ESTERR <= TOLERR)goto _70;
 
     #_60:;
