@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import scipy as sp
+import QUANC8
 import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
