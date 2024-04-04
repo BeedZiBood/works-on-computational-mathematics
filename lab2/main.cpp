@@ -51,16 +51,6 @@ int main() {
       {
         solve(n, ndim, B, (E + i * ndim), pivot);
       }
-
-      //            std::cout << "Solution (inverse matrix) = [\n";
-      //            for (int i = 0; i < n; i++) {
-      //                for (int j = 0; j < n; j++)
-      //                {
-      //                    std::cout << std::setw(13) << std::fixed << std::setprecision(0) << E[i * ndim + j] << " ";
-      //                }
-      //                std::cout << "\n";
-      //            }
-      //            std::cout << "]\n";
       std::cout << "Condition number = " << cond << "\n" << std::scientific << std::setprecision(1);
 
       std::cout << "R = [\n";
