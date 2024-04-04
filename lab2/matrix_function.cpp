@@ -36,4 +36,22 @@ namespace mashkin {
             std::cout << "\n";
         }
     }
+
+    double calculate_the_norm_of_a_matrix(long double *matrix, int ndim)
+    {
+        double result = 0.0;
+        for (int i = 0; i < ndim; i++)
+        {
+            double var = 0.0;
+            for (int j = 0; j < ndim; j++)
+            {
+                var += matrix[i * ndim + j];
+            }
+            if (var > result)
+            {
+                result = var;
+            }
+        }
+        return result;
+    }
 }

@@ -51,13 +51,16 @@ int main() {
       {
         solve(n, ndim, B, (E + i * ndim), pivot);
       }
-      std::cout << "Condition number = " << cond << "\n" << std::scientific << std::setprecision(1);
+      std::cout << "Condition number = " << cond << "\n" << std::fixed << std::setprecision(17);// << std::scientific << std::setprecision(1);
 
-      std::cout << "R = [\n";
+//      std::cout << "R = [\n";
       mashkin::multiply(n, ndim, copy_of_b, E, result_for_multiplication);
       mashkin::subtract(n, ndim, result_for_multiplication, copy_of_e, result_for_subtraction);
-      mashkin::print_matrix(n, ndim, result_for_subtraction);
-      std::cout << "]\n";
+//      mashkin::print_matrix(n, ndim, result_for_subtraction);
+//      std::cout << "]\n";
+      std::cout << "The norm of a matrix: ";
+      std::cout << mashkin::calculate_the_norm_of_a_matrix(result_for_subtraction, ndim);
+      std::cout << "\n";
 
       det = pivot[n-1];
       for (i = 0; i < n; i++)
