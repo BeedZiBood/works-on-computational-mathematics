@@ -26,17 +26,6 @@ namespace mashkin {
         }
     }
 
-    void print_matrix(int n, int ndim, long double *matrix)
-    {
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++)
-            {
-                std::cout << std::setw(8) << matrix[i * ndim + j] << " ";
-            }
-            std::cout << "\n";
-        }
-    }
-
     double calculate_the_norm_of_a_matrix(long double *matrix, int ndim)
     {
         double result = 0.0;
