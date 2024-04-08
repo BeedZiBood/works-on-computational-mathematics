@@ -1,5 +1,6 @@
 #include "RungeKutta.h"
 #include <iostream>
+#include <iomanip>
 #include <cstddef>
 #include <utility>
 #include <cmath>
@@ -7,8 +8,8 @@
 
 namespace mashkin
 {
-  MyArr::MyArr(double* arr):
-    x(arr, arr + sizeof(arr) / 4)
+  MyArr::MyArr(std::vector< double >& vect):
+    x(vect)
   {
   }
 
@@ -32,7 +33,7 @@ namespace mashkin
   MyArr MyArr::operator/(double num)
   {
     MyArr result = *this;
-    for (size_t i; i < result.x.size(); i++)
+    for (size_t i = 0; i < result.x.size(); i++)
     {
       result[i] /= num;
     }
@@ -42,7 +43,7 @@ namespace mashkin
   MyArr MyArr::operator+(MyArr&& rhs)
   {
     MyArr result = *this;
-    for (size_t i; i < result.x.size(); i++)
+    for (size_t i = 0; i < result.x.size(); i++)
     {
       result[i] += rhs[i];
     }
@@ -52,7 +53,7 @@ namespace mashkin
   MyArr MyArr::operator+(double num)
   {
     MyArr result = *this;
-    for (size_t i; i < result.x.size(); i++)
+    for (size_t i = 0; i < result.x.size(); i++)
     {
       result[i] += num;
     }
@@ -62,7 +63,7 @@ namespace mashkin
   MyArr MyArr::operator*(double num)
   {
     MyArr result = *this;
-    for (size_t i; i < result.x.size(); i++)
+    for (size_t i = 0; i < result.x.size(); i++)
     {
       result[i] *= num;
     }
@@ -76,7 +77,8 @@ namespace mashkin
 
   double func2(double t, MyArr&& x)
   {
-    return 30 * x[0] - 300 * x[1] + std::log(1 + 100 * t * t);
+    double var = 30 * x[0] - 300 * x[1] + std::log(1 + 100 * t * t);
+    return var;
   }
 
   size_t MyArr::size()
@@ -84,25 +86,28 @@ namespace mashkin
     return x.size();
   }
 
-  MyArr rungeKutta3degree(double t, double* x, double h)
+  MyArr rungeKutta3degree(double t, std::vector< double >& x, double h)
   {
-    double zero_arr[2]{0};
-    MyArr k1(zero_arr);
-    MyArr k2(zero_arr);
-    MyArr k3(zero_arr);
+    std::vector< double > zero_vect{0, 0};
+    MyArr k1(zero_vect);
+    MyArr k2(zero_vect);
+    MyArr k3(zero_vect);
     MyArr zn(x);
-    MyArr zn_plus_one(zero_arr);
     k1[0] = h * func1(t, std::move(zn));
     k1[1] = h * func2(t, std::move(zn));
     k2[0] = h * func1(t + h / 2, zn + k1 / 2);
     k2[1] = h * func2(t + h / 2, zn + k1 / 2);
     k3[0] = h * func1(t + 3 * h / 4, zn + (k2 * 3) / 4);
-    k3[0] = h * func2(t + 3 * h / 4, zn + (k2 * 3) / 4);
-    zn_plus_one = zn + (k1 * 2 + k2 * 3 + k3 * 4) / 9;
-    return zn_plus_one;
+    k3[1] = h * func2(t + 3 * h / 4, zn + (k2 * 3) / 4);
+    zn = zn + (k1 * 2 + k2 * 3 + k3 * 4) / 9;
+    for (size_t i = 0; i < x.size(); i++)
+    {
+      x[i] = zn[i];
+    }
+    return zn;
   }
 
-  std::ostream& operator<<(std::ostream& out, MyArr& dest)
+  std::ostream& operator<<(std::ostream& out, MyArr&& dest)
   {
     std::ostream::sentry sentry(out);
     if (!sentry)
@@ -115,8 +120,9 @@ namespace mashkin
       out << dest[i];
       if (i + 1 != dest.size())
       {
-        out << " ";
+        out << std::setw(13);
       }
     }
+    return out;
   }
 }

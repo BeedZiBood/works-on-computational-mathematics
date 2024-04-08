@@ -12,9 +12,9 @@ namespace mashkin
   public:
     MyArr() = default;
     ~MyArr() = default;
-    MyArr(double* arr);
+    MyArr(std::vector< double >& vect);
     MyArr(MyArr& rhs) = default;
-    MyArr(MyArr&& rhs) = default;
+    MyArr(MyArr&& rhs);
 
     MyArr operator/(double num);
     MyArr operator=(MyArr& rhs);
@@ -29,7 +29,7 @@ namespace mashkin
     std::vector< double > x;
   };
 
-  std::ostream& operator<<(std::ostream& out, MyArr& dest);
-  MyArr rungeKutta3degree(double t, double* x, double h);
+  std::ostream& operator<<(std::ostream& out, MyArr&& dest);
+  MyArr rungeKutta3degree(double t, std::vector< double >& x, double h);
 }
 #endif
