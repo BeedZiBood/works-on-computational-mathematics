@@ -24,6 +24,7 @@ namespace mashkin
     MyArr operator+(double num);
 
     double& operator[](size_t ind);
+    size_t size();
   private:
     std::vector< double > x;
   };
