@@ -1,8 +1,20 @@
-//
-// Created by beedz on 08.04.2024.
-//
-
 #ifndef LAB3_OUTPUTSTRUCTS_H
 #define LAB3_OUTPUTSTRUCTS_H
+#include <ios>
 
-#endif // LAB3_OUTPUTSTRUCTS_H
+namespace mashkin
+{
+  class iofmtguard
+  {
+  public:
+    iofmtguard(std::basic_ios< char >& s);
+    ~iofmtguard();
+
+  private:
+    std::basic_ios< char >& s_;
+    char fill_;
+    std::streamsize precision_;
+    std::basic_ios< char >::fmtflags fmt_;
+  };
+}
+#endif
