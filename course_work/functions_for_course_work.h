@@ -3,6 +3,6 @@
 
 namespace mashkin
 {
-  void function_for_search_min_x(double x);
+  double function_for_search_min_x(double x);
 }
 #endif
