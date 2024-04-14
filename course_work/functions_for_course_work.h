@@ -3,6 +3,7 @@
 
 namespace mashkin
 {
+  double function_for_integrate(double x);
   double function_for_search_min_x(double x);
 }
 #endif
