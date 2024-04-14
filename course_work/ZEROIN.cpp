@@ -1,135 +1,291 @@
-/* File converted with FORTRAN CONVERTER utility.
-FORTRAN CONVERTER is written by Grigoriev D., 2081/4.*/
+/************************************************/
+/*                                              */
+/*  CMATH.  Copyright (c) 1989 Design Software  */
+/*                                              */
+/************************************************/
 
+#include <math.h>
+#include <cmath>
 #include "FORSTYTHE.h"
 
-REAL ZEROIN(REAL AX,REAL BX,REAL (F)(REAL X),REAL TOL)
-{
-//     H��� ��HK��� F(X) B���C��ETC� B �HTEPBA�E AX,BX
+#define  EPSILON  2.2e-16
 
-//     BXO�HA� �H�OPMA���..
+/*-----------------------------------------------------------------*/
 
-//     AX     �EB�� KOHE� �CXO�HO�O �HTEPBA�A
-//     BX     �PAB�� KOHE� �CXO�HO�O �HTEPBA�A
-//     F      �O��PO�PAMMA-��HK���, KOTOPA� B���C��ET F(X)
-//            ��� ���O�O X B �HTEPBA�E AX BX
-//     TOL    �E�AEMA� ���HA �HTEPBA�A HEO�PE�E�EHHOCT�
-//            KOHE�HO�O PE����TATA
+#if (PROTOTYPE)
 
-//     B�XO�HA� �H�OPMA���...
+    double zeroin (double left, double right,
+           double (*f)(double x),
+           double tol,
+           int *flag)
 
-//     ZEROIN A�C��CCA, A��POKC�M�P���A� H��� ��HK��� F B
-//            �HTEPBA�E AX, BX
+#else
 
-//        �E� �POBEPK� �PE��O�A�AETC�, �TO F(AX) � F(BX) �ME�T
-//     �POT�BO�O�O�H�E �HAK�.
-//        ZEROIN B���C��ET H��� X B �A�AHHOM �HTEPBA�E AX, BX
-//     B �PE�E�AX �O��CKA HA O���K�  4*MACHEPS*ABS(X) + TOL,
-//     ��E MACHEPS-OTHOC�TE��HA� MA��HHA� TO�HOCT�.
-//        �TA �O��PO�PAMMA-��HK��� �PE�CTAB��ET CO�O� C�E�KA
-//     MO������POBAHH�� TPAHC����� A��O� 60-�PO�E��P� ZERO,
-//     �P�BE�EHHO� B KH��E RICHARD BRENT, ALGORITHMS FOR
-//     MINIMIZATION WITHOUT DERIVATIVES,PRENTICE HALL,INC.(1973).
+//    double zeroin (left, right, f, tol, flag)
+//
+//        double (*f)();
+double left,
+    right,
+    tol;
+int    *flag;
 
-REAL A,B,C,D,E,EPS,FA,FB,FC,TOL1,XM,P,Q,R,S;
+#endif
 
-//     B���C��T� EPS,OTHOC�TE��H�� MA��HH�� TO�HOCT�
+/* Purpose ...
+   -------
+   A zero of the function f(x) is computed, (possibly) in the
+   interval left, right.  If the user specifies an interval that
+   does not contain an odd number of zeros, zeroin() will attempt
+   to bracket such an interval.
 
-EPS=1.0;
-_10:;
-EPS=EPS/2.0;
-TOL1=1.0+EPS;
-if(TOL1>1.0)goto _10;
+   Input ...
+   -----
+   left     : left end-point of the initial interval
+   right    : right end-point of the initial interval
+   (*f)()   : pointer to function which evaluates f(x) for any x
+              in the interval left, right
+   tol      : desired length of interval of uncertainty of
+              the final result.  tol >= 0.0
 
-//     �P�CBOEH�E HA�A��H�X �HA�EH��
+   Output ...
+   ------
+   zeroin   : abscissa approximating a zero of f possibly in the
+              interval left, right
+   flag     : =  0, normal return
+              =  1, could not bracket a zero
+              =  2, tol is <= 0.0, or left == right
 
-A=AX;
-B=BX;
-FA=F(A);
-FB=F(B);
+   This C code written by ...  Peter & Nigel,
+   ----------------------      Design Software,
+                               42 Gubberley St,
+                               Kenmore, 4069,
+                               Australia.
 
-//     HA�AT� �A�
+   Version ... 2.0, 11-Feb-89
+   -------     1.1,  2-Dec-87
+               2.1, 30-Apr-89 bracketing added
 
-_20:;
-C=A;
-FC=FA;
-D=B-A;
-E=D;
-_30:;
-if(ABS(FC)>=ABS(FB))goto _40;
-A=B;
-B=C;
-C=A;
-FA=FB;
-FB=FC;
-FC=FA;
+   Notes ...
+   -----
+   (1) Uses the math function fabs(x).
 
-//     �POBEPKA CXO��MOCT�
+   (2) This program has been adapted from a FORTRAN program published
+       in the book :
+       Forsythe G.E., Malcolm, M.A. and Moler, C.B.
+       Computer Methods for Mathematical Computations
+       Prentice Hall
 
-_40:;
-TOL1=2.0*EPS*ABS(B)+0.5*TOL;
-XM=0.5*(C-B);
-if(ABS(XM)<=TOL1)goto _90;
+*/
+/*------------------------------------------------------------------*/
+    double zeroin (double left, double right,
+                  double (*f)(double x),
+                  double tol,
+                  int *flag)
+{                 /* ---- start of zeroin() ---- */
 
-//     HEO�XO��MA �� ��CEK���
+  /* local variables ... */
+  double zero, half, one, two, three;
+  double a, b, c, d, e;
+  double fa, fb, fc, tol1;
+  double xm, p, q, r, s;
+  int    zflag, skip, exit, bracket;
+  int    nstep, i, nseg;
+  double factor, x1, x2, dx, f1, f2;
 
-if(FB==0.0)goto _90;
-if(ABS(E)<TOL1)goto _70;
-if(ABS(FA)<=ABS(FB))goto _70;
+/* constants */
+#define  TRUE   1
+#define  FALSE  0
+  zero = 0.0;
+  half = 0.5;
+  one = 1.0;
+  two = 2.0;
+  three = 3.0;
 
-//     BO�MO�HA �� KBA�PAT��HA� �HTEP�O�����
+  /* Initialization */
+  zflag = 0;
+  exit = FALSE;
+  a = left;
+  b = right;
+  fa = (*f)(a);
+  fb = (*f)(b);
 
-if(A!=C)goto _50;
+  /* Check constraints */
+  if ( tol <= zero || left == right)
+  {
+    exit = TRUE;
+    zflag = 2;
+  }
 
-//     ��HE�HA� �HTEP�O�����
+  if ( fa * (fb / fabs(fb)) > zero )
+  {
+    /* try to bracket a zero ... */
+    bracket = FALSE;
 
-S=FB/FA;
-P=2.0*XM*S;
-Q=1.0-S;
-goto _60;
+    /* first check the possibility of an even number of zeros
+       within the user supplied range */
+    nseg = 10;
+    dx   = (b - a) / nseg;
+    x1   = a; f1 = fa;
+    for (i = 0; i < nseg; ++i)
+    {
+      x2 = x1 + dx;
+      f2 = (*f) (x2);
+      if (f1 * (f2 / fabs(f2)) < zero)
+      {
+        /* this segment brackets a zero */
+        bracket = TRUE;
+        a = x1; fa = f1;
+        b = x2; fb = f2;
+        break;
+      }
+      x1 = x2;
+      f1 = f2;
+    }
 
-//     O�PATHA� KBA�PAT��HA� �HTEP�O�����
+    if (!bracket)
+    {
+      /* now try extending the user supplied range ... */
+      factor = 1.6;   /* increase the range by this factor */
+      nstep  = 20;    /* maximum number of steps */
+      x1 = a; f1 = fa;
+      x2 = b; f2 = fb;
+      for (i = 0; i < nstep; ++i)
+      {
+        /* extend the range in the downhill direction */
+        if (fabs(f1) < fabs(f2))
+        {
+          x1 -= (x2 - x1) * factor;
+          f1 = (*f) (x1);
+        }
+        else
+        {
+          x2 += (x2 - x1) * factor;
+          f2 = (*f) (x2);
+        }
+        if (f1 * (f2 / fabs(f2)) <= zero)
+        {
+          /* we have bracketed a zero (or odd number of) */
+          bracket = TRUE;
+          a = x1; fa = f1;
+          b = x2; fb = f2;
+          break;
+        }
+      }
+    }
+    if (!bracket)
+    {
+      /* we have been unsuccessful in trying to bracket an
+         odd number of zeros */
+      exit = TRUE;
+      zflag = 1;
+    }
+  }
 
-_50:;
-Q=FA/FC;
-R=FB/FC;
-S=FB/FA;
-P=S*(2.0*XM*Q*(Q-R)-(B-A)*(R-1.0));
-Q=(Q-1.0)*(R-1.0)*(S-1.0);
 
-//     B��PAT� �HAK�
+  /* Begin step */
+  skip = FALSE;
+  while ( !exit )
+  {
 
-_60:;
-if(P>0.0)Q=-Q;
-P=ABS(P);
+    if ( !skip )
+    {
+      c = a;        /* ensure that the zero is between b and c */
+      fc = fa;
+      d = b - a;
+      e = d;
+    }
 
-//     �P�EM�EMA �� �HTEP�O�����
+    if ( fabs(fc) < fabs(fb) )
+    {
+      a = b;             /* swap b and c to give fc >= fb */
+      b = c;             /* b is then the best estimate for the zero */
+      c = a;
+      fa = fb;
+      fb = fc;
+      fc = fa;
+    }
 
-if((2.0*P)>=(3.0*XM*Q-ABS(TOL1*Q)))goto _70;
-if(P>=ABS(0.5*E*Q))goto _70;
-E=D;
-D=P/Q;
-goto _80;
+    /* Convergence test */
+    tol1 = two * EPSILON * fabs(b) + half * tol;
+    xm = half * (c - b);
+    /* bail out if the solution is found to the desired accuracy */
+    if ( (fabs(xm) < tol1) || (fb == zero) ) exit = TRUE;
 
-//     ��CEK���
+    if (!exit)
+    {  /* proceed with step */
 
-_70:;
-D=XM;
-E=D;
+      /* Is bisection necessary ? */
+      if ( (fabs(e) < tol1) || (fabs(fa) <= fabs(fb)) )
+      {
+        d = xm;          /* bisection */
+        e = d;
+      }
+      else
+      {
+        if ( a == c )  /* use quadratic interp. if are a and c distinct */
+        {
+          s = fb / fa;          /* linear interpolation */
+          p = two * xm * s;
+          q = one - s;
+        }
+        else
+        {
+          q = fa / fc;          /* quadratic interpolation */
+          r = fb / fc;
+          s = fb / fa;
+          p = s * (two * xm * q * (q - r) - (b - a) * (r - one));
+          q = (q - one) * (r - one) * (s - one);
+        }
 
-//     �ABEP��T� �A�
+        if ( p > zero ) q = -q;     /* adjust signs */
+        p = fabs(p);
 
-_80:;
-A=B;
-FA=FB;
-if(ABS(D)>TOL1)B=B+D;
-if(ABS(D)<=TOL1)B=B+SIGN(TOL1,XM);
-FB=F(B);
-if((FB*(FC/ABS(FC)))>0.0)goto _20;
-goto _30;
+        /* Is the interpolation acceptable? */
 
-//     KOH�EHO
+        if ( ((two * p) > (three * xm * q - fabs(tol1 * q))) ||
+            (p >= fabs(half * e * q)) )
+        {
+          d = xm;           /* use bisection */
+          e = d;
+        }
+        else
+        {
+          e = d;            /* use previously selected  */
+          d = p / q;        /* interpolation            */
+        }
+      }  /* if .. bisection necessary ? */
 
-_90:;
-return B;
-}                         	// END
+      /* Complete step */
+      a = b;                   /* save old point b as a */
+      fa = fb;
+      if (fabs(d) > tol1)
+        b = b + d;         /* move b to a new point closer to the zero */
+      else
+      {                  /* move b by a relatively small amount */
+        if (xm > zero)
+          b = b + fabs(tol1);
+        else
+          b = b - fabs(tol1);
+      }
+      fb = (*f)(b);            /* function value at the new point */
+
+      if ( (fb * (fc / fabs(fc))) <= zero )
+        skip = TRUE;       /* zero is already between b and c */
+      else skip = FALSE; /* swap a and c to get zero between b and c */
+
+    }  /* if not exit , end of step */
+  }  /* while */
+
+
+  /* all done */
+  *flag = zflag;
+
+  /* return the abscissa with the minimum absolute value */
+  return(b);
+
+#undef TRUE
+#undef FALSE
+
+}  /* ---- end of zeroin() ---- */
+
+/*-----------------------------------------------------------------*/

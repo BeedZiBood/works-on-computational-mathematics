@@ -34,7 +34,7 @@ inline int absval(int x)
 #define ABS(x) absval(x)
 #define SIGN(a,b) (b<0) ? (-absval(a)) : absval(a)
 
-REAL ZEROIN(REAL AX,REAL BX,REAL (F)(REAL X),REAL TOL);
+REAL zeroin(REAL AX,REAL BX,REAL (F)(REAL X),REAL TOL, int* flag);
 void INIT_URAND(int I);
 REAL URAND();
 void SVD(int M,int N,REAL **A,REAL *W,bool MATU,REAL **U,bool MATV,REAL **V,int &IERR,REAL *RV1);
