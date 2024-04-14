@@ -1,1 +1,10 @@
-/course_work/CMakeLists.txt
+git /course_work/CMakeLists.txt
+git /CMakeLists.txt
+git /course_work/cmake-build-debug/
+git /lab2/.idea/
+git /lab2/CMakeLists.txt
+git /lab2/cmake-build-debug/
+git /lab3/.idea/
+git /lab3/CMakeLists.txt
+git /lab3/cmake-build-debug/
+
