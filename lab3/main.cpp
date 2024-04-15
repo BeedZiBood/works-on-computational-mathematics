@@ -15,7 +15,7 @@ int main()
   int flag = 1;
   std::vector< double > x_vect_first{3.0, -1.0};
   std::vector< double > x_vect_second{3.0, -1.0};
-  std::cout << "RKF45:                                    | RungeKutta h = 0.0075    | h = 0.037\n";
+  std::cout << "RKF45:                                    | RungeKutta h = 0.0075    | h = 0.0037\n";
   for (double i = 0.0075; i <= 0.1501; i += 0.0075)
   {
     tOut = i;
